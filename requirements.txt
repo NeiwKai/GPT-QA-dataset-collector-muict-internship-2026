@@ -1,0 +1,7 @@
+llama-cpp-python
+pandas
+acl-anthology
+sentence_transformers
+umap-learn
+plotly
+
