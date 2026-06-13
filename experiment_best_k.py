@@ -4,6 +4,7 @@ import pandas as pd
 import matplotlib.pyplot as plt
 from umap import UMAP
 from sklearn.manifold import TSNE
+from sklearn.metrics import silhouette_score
 
 df = pd.read_csv("merged_dataset_logging.csv")
 
@@ -26,7 +27,7 @@ reducer = UMAP(
 '''
 reducer = TSNE(
     n_components=2, 
-    perplexity=30, 
+    perplexity=53, # 40X, 41, 50, 51X, 53V, 55X
     init='pca', 
     random_state=42
 )
@@ -56,4 +57,44 @@ for ax, k in zip(axes.ravel(), range(3, 11)):
     ax.set_yticks([])
 
 plt.tight_layout()
+plt.show()
+
+# Compute Silhouette Score
+scores = []
+
+for k in range(3, 11):
+    kmeans = KMeans(
+        n_clusters=k,
+        random_state=42,
+        n_init="auto"
+    )
+
+    labels = kmeans.fit_predict(embeddings)
+
+    score = silhouette_score(
+        embeddings,
+        labels,
+        metric="cosine"
+    )
+
+    scores.append((k, score))
+
+    print(f"K={k:2d}  Score={score:.4f}")
+
+df_scores = pd.DataFrame(
+    scores,
+    columns=["k", "silhouette"]
+)
+
+plt.figure(figsize=(8, 5))
+plt.plot(
+    df_scores["k"],
+    df_scores["silhouette"],
+    marker="o"
+)
+
+plt.xlabel("Number of Clusters (K)")
+plt.ylabel("Silhouette Score")
+plt.title("Silhouette Analysis")
+plt.grid(True)
 plt.show()
